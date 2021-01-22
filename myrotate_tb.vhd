@@ -62,7 +62,6 @@ BEGIN
         VARIABLE image_height : INTEGER;
         VARIABLE row : row_pointer;
         VARIABLE image : image_pointer;
-        VARIABLE padding : INTEGER;
         VARIABLE char : CHARACTER;
     BEGIN
         FOR i IN header_type'RANGE LOOP
@@ -78,7 +77,6 @@ BEGIN
         CHARACTER'pos(header(25)) * 2**24;
         REPORT "image_width: " & INTEGER'image(image_width) &
         ", image_height: " & INTEGER'image(image_height);
-        padding := (4 - image_width*3 mod 4) mod 4;
         image := new image_type(0 to image_height - 1);
         for row_i in 0 to image_height - 1 loop
             row := new row_type(0 to image_width - 1);
@@ -94,9 +92,7 @@ BEGIN
                     std_logic_vector(to_unsigned(character'pos(char), 8));
                 
                 end loop;
-                for i in 1 to padding loop
-                    read(bmp_file, char);
-                end loop;
+
                 image(row_i) := row;
         end loop;
         -- todo
@@ -114,9 +110,6 @@ BEGIN
                 character'val(to_integer(unsigned(row(col_i).red))));
             end loop;
             deallocate(row);
-            for i in 1 to padding loop
-              write(out_file, character'val(0));
-            end loop;
         end loop;
         deallocate(image);
         file_close(bmp_file);
