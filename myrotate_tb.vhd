@@ -10,18 +10,19 @@ USE ieee.numeric_std.ALL;
 ENTITY rotate_tb IS
 END rotate_tb;
 ARCHITECTURE behavioral OF rotate_tb IS
-    -- COMPONENT rotate IS
-    -- PORT (
-    --     degree          :   IN     INTEGER RANGE 3 DOWNTO 0;
-    --     -- pic_width_in    :   IN     INTEGER RANGE 50 DOWNTO 1; 
-    --     -- pic_height_in   :   IN     INTEGER RANGE 50 DOWNTO 1;
-    --     image_in        :   IN     IMAGE;
+    COMPONENT rotate IS
+    PORT (
+        degree          :   IN     INTEGER RANGE 3 DOWNTO 0;
+        
+        pic_width_in    :   IN     INTEGER RANGE 2048 DOWNTO 1; 
+        pic_height_in   :   IN     INTEGER RANGE 2048 DOWNTO 1;
+        image_in        :   IN     image_type;
 
-    --     -- pic_width_out   :   OUT    INTEGER RANGE 50 DOWNTO 1; 
-    --     -- pic_height_out  :   OUT    INTEGER RANGE 50 DOWNTO 1;
-    --     image_out       :   OUT    IMAGE  
-    -- );
-    -- END COMPONENT;
+        pic_width_out   :   OUT    INTEGER RANGE 2048 DOWNTO 1; 
+        pic_height_out  :   OUT    INTEGER RANGE 2048 DOWNTO 1;
+        image_out       :   OUT    image_type
+    );
+    END COMPONENT;
     
 
     SIGNAL degree_tb          :        INTEGER RANGE 3 DOWNTO 0;
@@ -31,21 +32,17 @@ ARCHITECTURE behavioral OF rotate_tb IS
     SIGNAL pic_width_out_tb   :        INTEGER RANGE 2048 DOWNTO 1; 
     SIGNAL pic_height_out_tb  :        INTEGER RANGE 2048 DOWNTO 1;
     SIGNAL image_out_tb       :        image_type;
-
-   
-    
-
 BEGIN
-    -- CUT : rotate 
-    -- PORT MAP (
-    --     degree_tb,        
-    --     -- pic_width_in_tb,  
-    --     -- pic_height_in_tb, 
-    --     image_in_tb,      
-    --     -- pic_width_out_tb, 
-    --     -- pic_height_out_tb,
-    --     image_out_tb     
-    -- );
+    CUT : rotate 
+    PORT MAP (
+        degree_tb,        
+        pic_width_in_tb,  
+        pic_height_in_tb, 
+        image_in_tb,      
+        pic_width_out_tb, 
+        pic_height_out_tb,
+        image_out_tb     
+    );
 
     PROCESS
         TYPE char_file IS FILE OF CHARACTER;
@@ -94,23 +91,10 @@ BEGIN
         pic_width_in_tb <= image_in_width;
         pic_height_in_tb <= image_in_height;
         wait for 10 ns;
-
-        
-        pic_width_out_tb  <= pic_width_in_tb;
-        pic_height_out_tb <= pic_height_in_tb;
-        image_out_tb      <= image_in_tb;
-        wait for 10 ns;
-        
-        image_in_width :=to_integer(unsigned(header(18))) +
-        to_integer(unsigned(header(19))) * 2**8 +
-        to_integer(unsigned(header(20))) * 2**16 +
-        to_integer(unsigned(header(21))) * 2**24;
-
-        image_in_height := to_integer(unsigned(header(22))) +
-        to_integer(unsigned(header(23))) * 2**8 +
-        to_integer(unsigned(header(24))) * 2**16 +
-        to_integer(unsigned(header(25))) * 2**24;
-       
+        -- pic_width_out_tb  <= pic_width_in_tb;
+        -- pic_height_out_tb <= pic_height_in_tb;
+        -- image_out_tb      <= image_in_tb;
+        -- wait for 10 ns;
         image_out_width := pic_width_out_tb;
         image_out_height := pic_height_out_tb;
         
