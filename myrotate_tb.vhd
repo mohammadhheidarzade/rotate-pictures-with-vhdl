@@ -56,7 +56,7 @@ BEGIN
     PROCESS
         TYPE char_file IS FILE OF CHARACTER;
         FILE bmp_file : char_file OPEN read_mode IS "test1.bmp";
-        FILE out_file : char_file OPEN write_mode IS "out.bmp";
+        FILE out_file : char_file OPEN write_mode IS "out1.bmp";
         VARIABLE header : header_type;
         VARIABLE image_width : INTEGER;
         VARIABLE image_height : INTEGER;
@@ -64,116 +64,63 @@ BEGIN
         VARIABLE image : image_pointer;
         VARIABLE padding : INTEGER;
         VARIABLE char : CHARACTER;
-        VARIABLE counter : Integer;
     BEGIN
-        counter := 0;
-
         FOR i IN header_type'RANGE LOOP
             read(bmp_file, header(i));
-            counter := counter + 1;
         END LOOP;
-
-        -- Read image width
         image_width := CHARACTER'pos(header(18)) +
         CHARACTER'pos(header(19)) * 2**8 +
         CHARACTER'pos(header(20)) * 2**16 +
         CHARACTER'pos(header(21)) * 2**24;
-
-        -- Read image height
         image_height := CHARACTER'pos(header(22)) +
         CHARACTER'pos(header(23)) * 2**8 +
         CHARACTER'pos(header(24)) * 2**16 +
         CHARACTER'pos(header(25)) * 2**24;
         REPORT "image_width: " & INTEGER'image(image_width) &
         ", image_height: " & INTEGER'image(image_height);
-
         padding := (4 - image_width*3 mod 4) mod 4;
         image := new image_type(0 to image_height - 1);
         for row_i in 0 to image_height - 1 loop
             row := new row_type(0 to image_width - 1);
-        
             for col_i in 0 to image_width - 1 loop
                     read(bmp_file, char);
-                    counter := counter + 1;
                     row(col_i).blue :=
                     std_logic_vector(to_unsigned(character'pos(char), 8));
                     read(bmp_file, char);
-                    counter := counter + 1;
                     row(col_i).green :=
                     std_logic_vector(to_unsigned(character'pos(char), 8));
                     read(bmp_file, char);
-                    counter := counter + 1;
                     row(col_i).red :=
                     std_logic_vector(to_unsigned(character'pos(char), 8));
                 
                 end loop;
                 for i in 1 to padding loop
                     read(bmp_file, char);
-                    counter := counter + 1;
                 end loop;
                 image(row_i) := row;
         end loop;
-
+        -- todo
         for i in header_type'range loop
             write(out_file, header(i));
-            counter := counter - 1;
         end loop;
         for row_i in 0 to image_height - 1 loop
             row := image(row_i);
-           
             for col_i in 0 to image_width - 1 loop
-           
-              -- Write blue pixel
               write(out_file,
                 character'val(to_integer(unsigned(row(col_i).blue))));
-                counter := counter - 1;
-           
-              -- Write green pixel
               write(out_file,
                 character'val(to_integer(unsigned(row(col_i).green))));
-                counter := counter - 1;
-           
-              -- Write red pixel
               write(out_file,
                 character'val(to_integer(unsigned(row(col_i).red))));
-                counter := counter - 1;
-           
             end loop;
-           
             deallocate(row);
-           
-            -- Write padding
             for i in 1 to padding loop
               write(out_file, character'val(0));
-              counter := counter - 1;
             end loop;
-           
         end loop;
-
-        wait for 10 ns;
-
         deallocate(image);
- 
         file_close(bmp_file);
         file_close(out_file);
-        
-        report "Simulation done. Check ""out.bmp"" image.";
-        -- report counter;
-        -- REPORT "image_width: " & INTEGER'image(counter);
-
-        assert counter = 0 
-        report "counter != 0 " ;
-        
-        assert counter > 0 
-        report "counter <= 0 " ;
-
-        assert counter > 0 
-        report "counter >= 0 " ;
-
-
-        
-
         wait;
-
 end process;    
 END behavioral ; -- arch
